@@ -24,10 +24,7 @@ public class HomeController {
     private final FileService fileService;
     private final NoteService noteService;
     private final CredentialService credentialService;
-    private static final String FILE_SAVE_ERROR = "There was an error saving your file. Please try again.";
-    private static final String NOTE_SAVE_ERROR = "There was an error saving your note. Please try again.";
-    private static final String CREDENTIAL_SAVE_ERROR = "There was an error saving your credential. Please try again.";
-
+    private static final String SAVE_ERROR = "Your changes were not saved.";
 
     @GetMapping()
     public String homeView(Authentication authentication, Model model) {
@@ -51,13 +48,13 @@ public class HomeController {
             File file = new File(null, multipartFile.getOriginalFilename(), multipartFile.getContentType(), String.valueOf(multipartFile.getSize()), userId, multipartFile.getBytes());
             int rowsAffected = fileService.createFile(file);
             if (rowsAffected < 1) {
-                error = FILE_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, FILE_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
@@ -81,13 +78,13 @@ public class HomeController {
         try {
             int rowsAffected = fileService.deleteFile(userId, fileId);
             if (rowsAffected < 1) {
-                error = FILE_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, FILE_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
@@ -100,13 +97,13 @@ public class HomeController {
         try {
             int rowsAffected = noteService.deleteNote(userId, noteId);
             if (rowsAffected < 1) {
-                error = NOTE_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, NOTE_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
@@ -122,13 +119,13 @@ public class HomeController {
             Note note = new Note(noteId, request.getNoteTitle(), request.getNoteDescription(), userId);
             int rowsAffected = noteId == null ? noteService.createNote(note) : noteService.updateNote(note);
             if (rowsAffected < 1) {
-                error = NOTE_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, NOTE_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
@@ -144,13 +141,13 @@ public class HomeController {
             Credential credential = new Credential(credentialId, request.getUrl(), request.getUsername(), "", request.getPassword(), userId);
             int rowsAffected = credentialId == null ? credentialService.createCredential(credential) : credentialService.updateCredential(credential);
             if (rowsAffected < 1) {
-                error = CREDENTIAL_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, CREDENTIAL_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
@@ -163,13 +160,13 @@ public class HomeController {
         try {
             int rowsAffected = credentialService.deleteCredential(userId, credentialId);
             if (rowsAffected < 1) {
-                error = CREDENTIAL_SAVE_ERROR;
+                error = SAVE_ERROR;
             }
         } catch (Exception e) {
             error = e.getMessage();
         }
 
-        updateResultModel(model, error, CREDENTIAL_SAVE_ERROR);
+        updateResultModel(model, error, SAVE_ERROR);
 
         return "result";
     }
