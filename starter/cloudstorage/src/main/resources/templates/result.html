@@ -12,16 +12,16 @@
         <div class="container justify-content-center w-50 p-3" style="margin-top: 5em;">
             <div th:if="${saveSuccess}" class="alert alert-success fill-parent">
                 <h1 class="display-5" id="success">Success</h1>
-                <span>Your changes were successfully saved. Click <a th:href="@{/home}">here</a> to continue.</span>
+                <span>Your changes were successfully saved. Click <a th:href="@{/home}" id="success-back-to-home">here</a> to continue.</span>
             </div>
             <div th:if="${saveError}" class="alert alert-danger fill-parent">
-                <h1 class="display-5">Error</h1>
-                <span>Your changes were not saved. Click <a th:href="@{/home}">here</a> to continue.</span>
+                <h1 class="display-5" id="save-error">Error</h1>
+                <span>Your changes were not saved. Click <a th:href="@{/home}" id="save-error-back-to-home">here</a> to continue.</span>
             </div>
             <div th:if="${error}" class="alert alert-danger fill-parent">
-                <h1 class="display-5">Error</h1>
+                <h1 class="display-5" id="error">Error</h1>
                 <span th:text="${error}"></span>
-                <span>Click <a th:href="@{/home}">here</a> to continue.</span>
+                <span>Click <a th:href="@{/home}" id="error-back-to-home">here</a> to continue.</span>
             </div>
         </div>
     </body>

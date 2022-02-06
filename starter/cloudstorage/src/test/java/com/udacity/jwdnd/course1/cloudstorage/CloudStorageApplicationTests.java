@@ -3,7 +3,6 @@ package com.udacity.jwdnd.course1.cloudstorage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -13,6 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+import java.util.List;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -20,6 +21,8 @@ class CloudStorageApplicationTests {
 	private int port;
 
 	private WebDriver driver;
+	private HomePage home;
+	private ResultPage result;
 
 	@BeforeAll
 	static void beforeAll() {
@@ -38,10 +41,22 @@ class CloudStorageApplicationTests {
 		}
 	}
 
+	/**
+	 * an unauthorized user can access the login pages.
+	 */
 	@Test
 	public void getLoginPage() {
 		driver.get("http://localhost:" + this.port + "/login");
 		Assertions.assertEquals("Login", driver.getTitle());
+	}
+
+	/**
+	 * an unauthorized user can access the signup pages.
+	 */
+	@Test
+	public void getSignupPage() {
+		driver.get("http://localhost:" + this.port + "/signup");
+		Assertions.assertEquals("Sign Up", driver.getTitle());
 	}
 
 	/**
@@ -82,7 +97,7 @@ class CloudStorageApplicationTests {
 		WebElement buttonSignUp = driver.findElement(By.id("buttonSignUp"));
 		buttonSignUp.click();
 
-		/* Check that the sign up was successful. 
+		/* Check that the sign up was successful.
 		// You may have to modify the element "success-msg" and the sign-up 
 		// success message below depening on the rest of your code.
 		*/
@@ -201,6 +216,110 @@ class CloudStorageApplicationTests {
 
 	}
 
+	/**
+	 * Verifies that an unauthorized user can only access the login and signup pages.
+	 */
+	@Test
+	public void testBlockUnauthorizedAccess() {
+		driver.get("http://localhost:" + this.port + "/home");
+		Assertions.assertNotEquals("Home", driver.getTitle());
+	}
 
+	/**
+	 * signs up a new user, logs in, verifies that the home page is accessible, logs out, and verifies that the home page is no longer accessible.
+	 */
+	@Test
+	public void testSignupLoginAndLogout() {
+		// sign up a new user
+		doMockSignUp("Logout","Test","LT","123");
+		// log in and home page is accessible
+		doLogIn("LT", "123");
+		Assertions.assertEquals("Home", driver.getTitle());
+		// log out and get redirected to login page
+		home = new HomePage(driver);
+		home.logout();
+		Assertions.assertEquals("Login", driver.getTitle());
+		// home page is no longer accessible
+		driver.get("http://localhost:" + this.port + "/home");
+		Assertions.assertNotEquals("Home", driver.getTitle());
+	}
+
+	private void navigateFromResultToHomePageNotes() {
+		result = new ResultPage(driver);
+		result.navigateToHomeAfterSuccess();
+		home = new HomePage(driver);
+		home.navigateToNotes();
+	}
+
+	private void createNote(String noteTitle, String noteDescription) {
+		home = new HomePage(driver);
+		home.addNewNote("TestNoteTitle", "TestNoteDescription");
+		navigateFromResultToHomePageNotes();
+	}
+
+	private void editNote(WebElement row, String noteTitle, String noteDescription) {
+		home.editNote(row, noteTitle, noteDescription);
+		navigateFromResultToHomePageNotes();
+	}
+
+	private void deleteNote(WebElement row) {
+		home.deleteNote(row);
+		navigateFromResultToHomePageNotes();
+	}
+
+	private void verifyNoteRow(WebElement row, String noteTitle, String noteDescription) {
+		Assertions.assertEquals(noteTitle, row.findElement(By.tagName("th")).getText());
+		Assertions.assertEquals(noteDescription, row.findElements(By.tagName("td")).get(1).getText());
+	}
+
+	/**
+	 * creates a note, and verifies it is displayed
+	 */
+	@Test
+	public void testAddNewNote() {
+		doMockSignUp("Add Note", "Test", "ANT", "123");
+		doLogIn("ANT", "123");
+
+		createNote("TestNoteTitle", "TestNoteDescription");
+		List<WebElement> rows = home.getNoteTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyNoteRow(rows.get(0), "TestNoteTitle", "TestNoteDescription");
+	}
+
+	/**
+	 * edits an existing note and verifies that the changes are displayed.
+	 */
+	@Test
+	public void testEditNote() {
+		doMockSignUp("Edit Note","Test","ENT","123");
+		doLogIn("ENT", "123");
+
+		createNote("TestNoteTitle", "TestNoteDescription");
+		List<WebElement> rows = home.getNoteTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyNoteRow(rows.get(0), "TestNoteTitle", "TestNoteDescription");
+
+		editNote(rows.get(0), "EditNoteTitle", "EditNoteDescription");
+		rows = home.getNoteTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyNoteRow(rows.get(0), "EditNoteTitle", "EditNoteDescription");
+	}
+
+	/**
+	 * deletes a note and verifies that the note is no longer displayed.
+	 */
+	@Test
+	public void testDeleteNote() {
+		doMockSignUp("Delete Note","Test","DNT","123");
+		doLogIn("DNT", "123");
+		createNote("TestNoteTitle", "TestNoteDescription");
+		List<WebElement> rows = home.getNoteTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyNoteRow(rows.get(0), "TestNoteTitle", "TestNoteDescription");
+
+		deleteNote(rows.get(0));
+		rows = home.getNoteTableRows();
+		Assertions.assertEquals(0, rows.size());
+	}
 
 }
