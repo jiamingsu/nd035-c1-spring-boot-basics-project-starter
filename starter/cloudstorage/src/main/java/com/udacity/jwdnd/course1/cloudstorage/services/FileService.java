@@ -2,6 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage.services;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.FileMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.model.FileResult;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public class FileService {
         return fileMapper.insert(file);
     }
 
-    public List<File> listAllFiles(Integer userId) {
+    public List<FileResult> listAllFiles(Integer userId) {
         return fileMapper.listAllFiles(userId);
     }
 
