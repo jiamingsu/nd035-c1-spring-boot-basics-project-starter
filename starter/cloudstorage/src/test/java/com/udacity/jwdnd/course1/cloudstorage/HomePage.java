@@ -11,7 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.List;
 
 public class HomePage {
-    private WebDriverWait webDriverWait;
+    private final WebDriverWait webDriverWait;
     public HomePage(WebDriver webDriver) {
         webDriverWait = new WebDriverWait(webDriver, 2);
         PageFactory.initElements(webDriver, this);
@@ -23,8 +23,14 @@ public class HomePage {
     @FindBy(id = "nav-notes-tab")
     private WebElement notesNavigationTab;
 
+    @FindBy(id = "nav-credentials-tab")
+    private WebElement credentialsNavigationTab;
+
     @FindBy(id = "add-note-button")
     private WebElement addNoteButton;
+
+    @FindBy(id = "add-credential-button")
+    private WebElement addCredentialButton;
 
     @FindBy(id = "note-title")
     private WebElement noteTitleInput;
@@ -35,8 +41,39 @@ public class HomePage {
     @FindBy(id = "note-submit-button")
     private WebElement noteSubmitButton;
 
+    @FindBy(id = "credential-url")
+    private WebElement credentialUrlInput;
+
+    public String getCredentialUrlInputValue() {
+        return credentialUrlInput.getAttribute("value");
+    }
+
+    @FindBy(id = "credential-username")
+    private WebElement credentialUsernameInput;
+
+    public String getCredentialUsernameInputValue() {
+        return credentialUsernameInput.getAttribute("value");
+    }
+
+    @FindBy(id = "credential-password")
+    private WebElement credentialPasswordInput;
+
+    public String getCredentialPasswordInputValue() {
+        return credentialPasswordInput.getAttribute("value");
+    }
+
+    public String getCredentialPasswordInputType() {
+        return credentialPasswordInput.getAttribute("type");
+    }
+
+    @FindBy(id = "credential-submit-button")
+    private WebElement credentialSubmitButton;
+
     @FindBy(id = "noteTable")
     private WebElement noteTable;
+
+    @FindBy(id = "credentialTable")
+    private WebElement credentialTable;
 
     public void logout() {
         logoutButton.click();
@@ -48,8 +85,17 @@ public class HomePage {
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes")));
     }
 
+    public void navigateToCredentials() {
+        credentialsNavigationTab.click();
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-credentials")));
+    }
+
     public List<WebElement> getNoteTableRows() {
         return noteTable.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
+    }
+
+    public List<WebElement> getCredentialTableRows() {
+        return credentialTable.findElement(By.tagName("tbody")).findElements(By.tagName("tr"));
     }
 
     public void openAddNoteModal() {
@@ -57,10 +103,21 @@ public class HomePage {
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
     }
 
-    public void openEditNoteModel(WebElement row) {
+    public void openAddCredentialModal() {
+        addCredentialButton.click();
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
+    }
+
+    public void openEditNoteModal(WebElement row) {
         WebElement editButton = row.findElement(By.tagName("td")).findElement(By.tagName("button"));
         editButton.click();
         webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("noteModal")));
+    }
+
+    public void openEditCredentialModal(WebElement row) {
+        WebElement editButton = row.findElement(By.tagName("td")).findElement(By.tagName("button"));
+        editButton.click();
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credentialModal")));
     }
 
     public void saveNote() {
@@ -68,21 +125,12 @@ public class HomePage {
         webDriverWait.until(ExpectedConditions.titleContains("Result"));
     }
 
-    public void addNewNote(String noteTitle, String noteDescription) {
-        navigateToNotes();
-        openAddNoteModal();
-        // type in note title
-        noteTitleInput.click();
-        noteTitleInput.sendKeys(noteTitle);
-        // type in note description
-        noteDescriptionTextArea.click();
-        noteDescriptionTextArea.sendKeys(noteDescription);
-        // submit note
-        saveNote();
+    public void saveCredential() {
+        credentialSubmitButton.click();
+        webDriverWait.until(ExpectedConditions.titleContains("Result"));
     }
 
-    public void editNote(WebElement row, String noteTitle, String noteDescription) {
-        openEditNoteModel(row);
+    private void setNote(String noteTitle, String noteDescription) {
         // type in note title
         noteTitleInput.click();
         noteTitleInput.clear();
@@ -91,11 +139,50 @@ public class HomePage {
         noteDescriptionTextArea.click();
         noteDescriptionTextArea.clear();
         noteDescriptionTextArea.sendKeys(noteDescription);
-        // submit note
+    }
+
+    public void addNewNote(String noteTitle, String noteDescription) {
+        navigateToNotes();
+        openAddNoteModal();
+        setNote(noteTitle, noteDescription);
+        saveNote();
+    }
+
+    public void setCredential(String credentialUrl, String credentialUsername, String credentialPassword){
+        // type in credential url
+        credentialUrlInput.click();
+        credentialUrlInput.clear();
+        credentialUrlInput.sendKeys(credentialUrl);
+        // type in credential username
+        credentialUsernameInput.click();
+        credentialUsernameInput.clear();
+        credentialUsernameInput.sendKeys(credentialUsername);
+        // type in credential password
+        credentialPasswordInput.click();
+        credentialPasswordInput.clear();
+        credentialPasswordInput.sendKeys(credentialPassword);
+    }
+
+    public void addCredential(String credentialUrl, String credentialUsername, String credentialPassword) {
+        navigateToCredentials();
+        openAddCredentialModal();
+        setCredential(credentialUrl, credentialUsername, credentialPassword);
+        saveCredential();
+    }
+
+    public void editNote(WebElement row, String noteTitle, String noteDescription) {
+        openEditNoteModal(row);
+        setNote(noteTitle, noteDescription);
         saveNote();
     }
 
     public void deleteNote(WebElement row) {
+        WebElement deleteLink = row.findElement(By.tagName("td")).findElement(By.tagName("a"));
+        deleteLink.click();
+        webDriverWait.until(ExpectedConditions.titleContains("Result"));
+    }
+
+    public void deleteCredential(WebElement row) {
         WebElement deleteLink = row.findElement(By.tagName("td")).findElement(By.tagName("a"));
         deleteLink.click();
         webDriverWait.until(ExpectedConditions.titleContains("Result"));

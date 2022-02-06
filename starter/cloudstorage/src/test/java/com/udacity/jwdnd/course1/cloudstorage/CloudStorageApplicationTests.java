@@ -244,17 +244,32 @@ class CloudStorageApplicationTests {
 		Assertions.assertNotEquals("Home", driver.getTitle());
 	}
 
-	private void navigateFromResultToHomePageNotes() {
+	private void navigateFromResultToHome() {
 		result = new ResultPage(driver);
 		result.navigateToHomeAfterSuccess();
 		home = new HomePage(driver);
+	}
+
+	private void navigateFromResultToHomePageNotes() {
+		navigateFromResultToHome();
 		home.navigateToNotes();
+	}
+
+	private void navigateFromResultToHomePageCredentials() {
+		navigateFromResultToHome();
+		home.navigateToCredentials();
 	}
 
 	private void createNote(String noteTitle, String noteDescription) {
 		home = new HomePage(driver);
-		home.addNewNote("TestNoteTitle", "TestNoteDescription");
+		home.addNewNote(noteTitle, noteDescription);
 		navigateFromResultToHomePageNotes();
+	}
+
+	private void createCredential(String credentialUrl, String credentialUsername, String credentialPassword) {
+		home = new HomePage(driver);
+		home.addCredential(credentialUrl, credentialUsername, credentialPassword);
+		navigateFromResultToHomePageCredentials();
 	}
 
 	private void editNote(WebElement row, String noteTitle, String noteDescription) {
@@ -264,6 +279,11 @@ class CloudStorageApplicationTests {
 
 	private void deleteNote(WebElement row) {
 		home.deleteNote(row);
+		navigateFromResultToHomePageNotes();
+	}
+
+	private void deleteCredential(WebElement row) {
+		home.deleteCredential(row);
 		navigateFromResultToHomePageNotes();
 	}
 
@@ -322,4 +342,71 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals(0, rows.size());
 	}
 
+	private void verifyCredentialRow(WebElement row, String credentialUrl, String credentialUsername, String credentialPassword) {
+		Assertions.assertEquals(credentialUrl, row.findElement(By.tagName("th")).getText());
+		Assertions.assertEquals(credentialUsername, row.findElements(By.tagName("td")).get(1).getText());
+		WebElement password = row.findElements(By.tagName("td")).get(2).findElement(By.tagName("input"));
+		Assertions.assertEquals(credentialPassword, password.getAttribute("value"));
+		boolean isEncrypted = password.getAttribute("type").equals("password");
+		Assertions.assertEquals(true, isEncrypted);
+	}
+
+	private void verifyCredentialModal(String credentialUrl, String credentialUsername, String credentialPassword) {
+		Assertions.assertEquals(credentialUrl, home.getCredentialUrlInputValue());
+		Assertions.assertEquals(credentialUsername, home.getCredentialUsernameInputValue());
+		Assertions.assertEquals(credentialPassword, home.getCredentialPasswordInputValue());
+		boolean isUnencrypted = home.getCredentialPasswordInputType().equals("text");
+		Assertions.assertEquals(true, isUnencrypted);
+	}
+
+	/**
+	 * creates a set of credentials, verifies that they are displayed, and verifies that the displayed password is encrypted.
+	 */
+	@Test
+	public void testAddNewCredential() {
+		doMockSignUp("Add Credential","Test","ACT","123");
+		doLogIn("ACT", "123");
+		createCredential("testCredentialUrl.com", "testCredentialUsername", "testCredentialPassword");
+		List<WebElement> rows = home.getCredentialTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyCredentialRow(rows.get(0), "testCredentialUrl.com", "testCredentialUsername", "testCredentialPassword");
+	}
+
+	/**
+	 * views an existing set of credentials, verifies that the viewable password is unencrypted, edits the credentials, and verifies that the changes are displayed
+	 */
+	@Test
+	public void testEditCredential() {
+		doMockSignUp("Edit Credential","Test","ECT","123");
+		doLogIn("ECT", "123");
+		createCredential("testCredentialUrl.com", "testCredentialUsername", "testCredentialPassword");
+		List<WebElement> rows = home.getCredentialTableRows();
+		Assertions.assertEquals(1, rows.size());
+		home.openEditCredentialModal(rows.get(0));
+		verifyCredentialModal("testCredentialUrl.com", "testCredentialUsername", "testCredentialPassword");
+		home.setCredential("google.com", "ECT", "123");
+		home.saveCredential();
+		navigateFromResultToHomePageCredentials();
+		rows = home.getCredentialTableRows();
+		Assertions.assertEquals(1, rows.size());
+		verifyCredentialRow(rows.get(0), "google.com", "ECT", "123");
+		home.openEditCredentialModal(rows.get(0));
+		verifyCredentialModal("google.com", "ECT", "123");
+	}
+
+	/**
+	 * deletes an existing set of credentials and verifies that the credentials are no longer displayed.
+	 */
+	@Test
+	public void testDeleteCredential() {
+		doMockSignUp("Delete Credential","Test","DCT","123");
+		doLogIn("DCT", "123");
+		createCredential("testCredentialUrl.com", "testCredentialUsername", "testCredentialPassword");
+		List<WebElement> rows = home.getCredentialTableRows();
+		Assertions.assertEquals(1, rows.size());
+		deleteCredential(rows.get(0));
+
+		rows = home.getCredentialTableRows();
+		Assertions.assertEquals(0, rows.size());
+	}
 }
