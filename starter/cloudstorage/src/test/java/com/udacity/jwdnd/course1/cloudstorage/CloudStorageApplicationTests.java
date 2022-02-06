@@ -223,6 +223,7 @@ class CloudStorageApplicationTests {
 	public void testBlockUnauthorizedAccess() {
 		driver.get("http://localhost:" + this.port + "/home");
 		Assertions.assertNotEquals("Home", driver.getTitle());
+		Assertions.assertEquals("Login", driver.getTitle());
 	}
 
 	/**
