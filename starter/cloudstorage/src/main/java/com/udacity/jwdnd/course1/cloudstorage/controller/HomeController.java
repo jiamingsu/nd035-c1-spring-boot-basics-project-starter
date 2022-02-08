@@ -48,6 +48,9 @@ public class HomeController {
             if(multipartFile.isEmpty()) {
                 throw new Exception("File is empty.");
             }
+            if(multipartFile.getSize() > 5 * 1024 * 1024) {
+                throw new Exception("File size exceeds limit.");
+            }
             File file = new File(null, multipartFile.getOriginalFilename(), multipartFile.getContentType(), String.valueOf(multipartFile.getSize()), userId, multipartFile.getBytes());
             int rowsAffected = fileService.createFile(file);
             if (rowsAffected < 1) {
