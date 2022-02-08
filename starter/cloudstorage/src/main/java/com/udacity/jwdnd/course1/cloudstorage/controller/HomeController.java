@@ -129,6 +129,11 @@ public class HomeController {
         String error = null;
 
         try {
+            String noteTitle = request.getNoteTitle();
+            String noteDescription = request.getNoteDescription();
+            if(noteService.findNote(userId, noteTitle, noteDescription) != null) {
+                throw new Exception("Note already available.");
+            }
             Note note = new Note(noteId, request.getNoteTitle(), request.getNoteDescription(), userId);
             int rowsAffected = noteId == null ? noteService.createNote(note) : noteService.updateNote(note);
             if (rowsAffected < 1) {
