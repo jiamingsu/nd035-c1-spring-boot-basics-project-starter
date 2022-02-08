@@ -51,7 +51,14 @@ public class HomeController {
             if(multipartFile.getSize() > 5 * 1024 * 1024) {
                 throw new Exception("File size exceeds limit.");
             }
-            File file = new File(null, multipartFile.getOriginalFilename(), multipartFile.getContentType(), String.valueOf(multipartFile.getSize()), userId, multipartFile.getBytes());
+
+            String filename = multipartFile.getOriginalFilename();
+
+            if(fileService.findFileByName(userId, filename) != null) {
+                throw new Exception("File is already exist.");
+            }
+
+            File file = new File(null, filename, multipartFile.getContentType(), String.valueOf(multipartFile.getSize()), userId, multipartFile.getBytes());
             int rowsAffected = fileService.createFile(file);
             if (rowsAffected < 1) {
                 error = SAVE_ERROR;
