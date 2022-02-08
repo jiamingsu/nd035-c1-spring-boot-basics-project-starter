@@ -45,6 +45,9 @@ public class HomeController {
         String error = null;
 
         try {
+            if(multipartFile.isEmpty()) {
+                throw new Exception("File is empty.");
+            }
             File file = new File(null, multipartFile.getOriginalFilename(), multipartFile.getContentType(), String.valueOf(multipartFile.getSize()), userId, multipartFile.getBytes());
             int rowsAffected = fileService.createFile(file);
             if (rowsAffected < 1) {
