@@ -345,18 +345,14 @@ class CloudStorageApplicationTests {
 	private void verifyCredentialRow(WebElement row, String credentialUrl, String credentialUsername, String credentialPassword) {
 		Assertions.assertEquals(credentialUrl, row.findElement(By.tagName("th")).getText());
 		Assertions.assertEquals(credentialUsername, row.findElements(By.tagName("td")).get(1).getText());
-		WebElement password = row.findElements(By.tagName("td")).get(2).findElement(By.tagName("input"));
-		Assertions.assertEquals(credentialPassword, password.getAttribute("value"));
-		boolean isEncrypted = password.getAttribute("type").equals("password");
-		Assertions.assertEquals(true, isEncrypted);
+		WebElement encryptedPassword = row.findElements(By.tagName("td")).get(2);
+		Assertions.assertNotEquals(credentialPassword, encryptedPassword.getText());
 	}
 
 	private void verifyCredentialModal(String credentialUrl, String credentialUsername, String credentialPassword) {
 		Assertions.assertEquals(credentialUrl, home.getCredentialUrlInputValue());
 		Assertions.assertEquals(credentialUsername, home.getCredentialUsernameInputValue());
 		Assertions.assertEquals(credentialPassword, home.getCredentialPasswordInputValue());
-		boolean isUnencrypted = home.getCredentialPasswordInputType().equals("text");
-		Assertions.assertEquals(true, isUnencrypted);
 	}
 
 	/**

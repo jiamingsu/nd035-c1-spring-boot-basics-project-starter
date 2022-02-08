@@ -52,7 +52,7 @@ public class CredentialService {
 
     private void decryptCredential(Credential credential) {
         String decryptedPassword = encryptionService.decryptValue(credential.getPassword(), credential.getKey());
-        credential.setPassword(decryptedPassword);
-        credential.setKey("");
+        // return decryptedPassword using key field
+        credential.setKey(decryptedPassword);
     }
 }
